@@ -4,3 +4,4 @@ Lib/
 Scripts/
 geekshop/private_settings.json
 geekshop/private_settings_mailtrap.json
+/frontend/node_modules/**
