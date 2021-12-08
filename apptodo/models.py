@@ -3,9 +3,9 @@ from django.db import models
 
 
 class Project(models.Model):
-    name = models.CharField(max_length=128)
-    git_link = models.URLField(blank=True)
-    users = models.ManyToManyField(get_user_model())
+    name = models.CharField('Название', max_length=128)
+    git_link = models.URLField('Ссылка на репозиторий', blank=True)
+    users = models.ManyToManyField(get_user_model(), verbose_name='Пользователи')
 
     def __str__(self):
         return f'{self.name}'
