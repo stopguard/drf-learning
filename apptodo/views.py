@@ -3,7 +3,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from apptodo.filters import ProjectViewFilter, ToDoViewFilter
 from apptodo.models import Project, ToDo
-from apptodo.serializers import ProjectSerializer, ToDoSerializer
+from apptodo.serializers import ProjectSerializer, ToDoSerializer, ToDoGetSerializer
 
 
 class PageNumberPaginationLimit10(PageNumberPagination):
@@ -23,9 +23,13 @@ class ProjectModelViewSet(ModelViewSet):
 
 class ToDoModelViewSet(ModelViewSet):
     queryset = ToDo.objects.all()
-    serializer_class = ToDoSerializer
     pagination_class = PageNumberPaginationLimit20
     filterset_class = ToDoViewFilter
+
+    def get_serializer_class(self):
+        if self.request.method in ['GET']:
+            return ToDoGetSerializer
+        return ToDoSerializer
 
     def perform_destroy(self, instance):
         instance.is_active = False
