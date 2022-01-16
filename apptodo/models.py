@@ -1,8 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
+from todoproject.mixins import OrderingByIdMixin
 
-class Project(models.Model):
+
+class Project(OrderingByIdMixin, models.Model):
     name = models.CharField('Название', max_length=128)
     git_link = models.URLField('Ссылка на репозиторий', blank=True)
     users = models.ManyToManyField(get_user_model(), verbose_name='Пользователи')
@@ -11,7 +13,7 @@ class Project(models.Model):
         return f'{self.name}'
 
 
-class ToDo(models.Model):
+class ToDo(OrderingByIdMixin, models.Model):
     project = models.ForeignKey(Project, models.CASCADE, verbose_name='Связанный проект')
     creator = models.ForeignKey(get_user_model(), models.CASCADE, verbose_name='Автор')
     body = models.TextField('Текст задачи')

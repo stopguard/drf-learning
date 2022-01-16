@@ -7,7 +7,8 @@ import {HashRouter, Redirect, Route, Switch} from "react-router-dom";
 import ToDosList from "./components/ToDos";
 import ProjectsList, {ProjectDetail} from "./components/Projects";
 
-const apiUrl = 'http://192.168.43.12:8000/api/';
+const apiIpAddress = '192.168.0.103'
+const apiUrl = `http://${apiIpAddress}:8000/api/`;
 
 const page404 = ({path}) => {
     return (
