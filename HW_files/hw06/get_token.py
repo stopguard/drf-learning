@@ -6,7 +6,7 @@ token_response = requests.post(f'http://{api_ip}:8000/api-token-auth/',
                                data={'username': 'django',
                                      'password': 'geekshop'})
 
-jwt_response = requests.post(f'http://{api_ip}/api-jwt/',
+jwt_response = requests.post(f'http://{api_ip}:8000/api-jwt/',
                              data={'username': 'django',
                                    'password': 'geekshop'})
 
