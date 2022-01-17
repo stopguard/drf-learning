@@ -1,11 +1,14 @@
+import requests
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework import status
-from rest_framework.test import APIRequestFactory, force_authenticate, APIClient, APITestCase
+from rest_framework.test import APIRequestFactory, force_authenticate, APIClient, APITestCase, RequestsClient
 from mixer.backend.django import mixer
 
 from apptodo.models import Project
 from apptodo.views import ProjectModelViewSet
+
+API_IP = '192.168.0.103'  # set your IP-address
 
 
 class TestProjectModelViewSet(TestCase):
@@ -70,6 +73,24 @@ class TestProjectModelViewSet(TestCase):
         response = client.get(f'/api/projects/{project.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def live_test_get_detail(self):
+        client = RequestsClient()
+        print('\nlive get detail check')
+        token_response = requests.post(f'http://{API_IP}:8000/api-jwt/',
+                                       data={'username': 'django',
+                                             'password': 'geekshop'})
+
+        token = token_response.json()['access']
+
+        print('\nget detail check')
+        response = client.get(f'/api/projects/1/',
+                              headers={
+                                  "Content-Type": "application/json;charset=utf-8",
+                                  "X-Requested-With": "XMLHttpRequest",
+                                  'Authorization': f'Bearer {token}'
+                              })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
 
 class APITestProjectModelViewSet(APITestCase):
     def setUp(self):
@@ -96,11 +117,8 @@ class APITestProjectModelViewSet(APITestCase):
         project = mixer.blend(Project)
         self.client.login(username='superuser', password='rasdvatri')
         print('\nput detail check')
-        print(f'project: {project}')
-        print(f'project.git_link: {project.git_link}')
-        print(f'project.users {project.users}')
         response = self.client.put(f'/api/projects/{project.id}/',
-                                   {'name': 'абвгдёж', 'git_link': project.git_link, 'users': [1, 2, 3]})
+                                   {'name': 'абвгдёж', 'users': [1, 2, 3]})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         project = Project.objects.get(pk=project.pk)
         self.assertEqual(project.name, 'абвгдёж')
