@@ -3,7 +3,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from apptodo.filters import ProjectViewFilter, ToDoViewFilter
 from apptodo.models import Project, ToDo
-from apptodo.serializers import ProjectSerializer, ToDoSerializer, ToDoGetSerializer
+from apptodo.serializers import ProjectSerializer, ProjectGetSerializer, ToDoSerializer, ToDoGetSerializer
 
 
 class PageNumberPaginationLimit10(PageNumberPagination):
@@ -19,6 +19,11 @@ class ProjectModelViewSet(ModelViewSet):
     serializer_class = ProjectSerializer
     pagination_class = PageNumberPaginationLimit10
     filterset_class = ProjectViewFilter
+
+    def get_serializer_class(self):
+        if self.request.method in ['GET']:
+            return ProjectGetSerializer
+        return ProjectSerializer
 
 
 class ToDoModelViewSet(ModelViewSet):
