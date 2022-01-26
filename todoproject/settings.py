@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'drf_yasg',
+    'graphene_django',
 
     'appauth',
     'apptodo',
@@ -133,6 +134,10 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = 'appauth.CustomUser'
+
+GRAPHENE = {
+    'SCHEMA': 'todoproject.schema.schema'
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
