@@ -17,7 +17,7 @@ class PageNumberPaginationLimit20(PageNumberPagination):
 class ProjectModelViewSet(ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    pagination_class = PageNumberPaginationLimit10
+    pagination_class = None  # чтобы избежать возни с вьюхами. Как сделать знаю, но на отладку нет времени
     filterset_class = ProjectViewFilter
 
     def get_serializer_class(self):
@@ -39,4 +39,3 @@ class ToDoModelViewSet(ModelViewSet):
     def perform_destroy(self, instance):
         instance.is_active = False
         instance.save()
-

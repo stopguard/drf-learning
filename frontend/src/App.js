@@ -8,15 +8,17 @@ import Footer from "./components/Footer";
 import ToDosList from "./components/ToDos";
 import ProjectsList, {ProjectDetail} from "./components/Projects";
 import LoginForm from "./components/Auth";
+import ToDoForm from "./components/ToDoForm";
+import ProjectForm from "./components/ProjectForm";
 
 const apiIpAddress = '192.168.0.103'
-const apiUrl = `http://${apiIpAddress}:8000`;
+const apiUrl = `http://${apiIpAddress}:8000/api`;
 
 const page404 = ({path}) => {
     return (
         <h1>Page '{path.pathname}' not found</h1>
-    )
-}
+    );
+};
 
 class App extends React.Component {
     constructor(props) {
@@ -43,6 +45,7 @@ class App extends React.Component {
         cookies.set('username', username);
         if (token !== '') {
             this.setState({token: token, isAuthenticated: true});
+            this.getStorageToken();
         } else {
             this.setState({token: token, isAuthenticated: false});
         }
@@ -53,14 +56,14 @@ class App extends React.Component {
     }
 
     getStorageToken() {
-        const cookies = new Cookies()
-        const token = cookies.get('token')
-        const username = cookies.get('username')
+        const cookies = new Cookies();
+        const token = cookies.get('token');
+        const username = cookies.get('username');
         if (token !== '') {
             this.setState({token: token, 'username': username, isAuthenticated: true}, () => {
-                this.loadProjects(`${apiUrl}/api/projects`);
-                this.loadUsers(`${apiUrl}/api/users`);
-                this.loadToDo(`${apiUrl}/api/todo`);
+                this.loadProjects(`${apiUrl}/projects/`);
+                this.loadUsers(`${apiUrl}/users/`);
+                this.loadToDo(`${apiUrl}/todo/`);
             });
         } else {
             this.setState({token: token, 'username': '', isAuthenticated: false});
@@ -68,7 +71,7 @@ class App extends React.Component {
     }
 
     getToken(username, password) {
-        fetch(`${apiUrl}/api/jwt/`,
+        fetch(`${apiUrl}/jwt/`,
             {
                 method: "POST",
                 headers: {
@@ -84,7 +87,7 @@ class App extends React.Component {
                 return response.json();
             })
             .then(response => {
-                this.setToken(response.access, username)
+                this.setToken(response.access, username);
             })
             .catch(error => console.log(error));
     }
@@ -105,27 +108,27 @@ class App extends React.Component {
         fetch(`${url}`,
             {
                 method: "GET",
-                headers: headers,
+                'headers': headers,
             })
             .then((response) => {
                 return response.json();
             })
             .then((request) => {
-                if (request.results) {
-                    const users = request.results;
-                    const previous = request.previous;
-                    const next = request.next;
+                if (!request.detail) {
+                    // const users = request;
+                    // const previous = request.previous;
+                    // const next = request.next;
                     this.setState(
                         {
-                            previousUsersUrl: previous,
-                            nextUsersUrl: next,
-                            usersList: users,
+                            // previousUsersUrl: previous,
+                            // nextUsersUrl: next,
+                            usersList: request,
                         }
                     );
                 }
             })
             .catch(error => console.log(error));
-    };
+    }
 
     loadToDo(url) {
         const headers = this.getHeaders();
@@ -152,7 +155,7 @@ class App extends React.Component {
                 }
             })
             .catch(error => console.log(error));
-    };
+    }
 
     loadProjects(url) {
         const headers = this.getHeaders();
@@ -165,21 +168,55 @@ class App extends React.Component {
                 return response.json();
             })
             .then((request) => {
-                if (request.results) {
-                    const projectsList = request.results;
-                    const previous = request.previous;
-                    const next = request.next;
+                if (!request.detail) {
+                    // const projectsList = request.results;
+                    // const previous = request.previous;
+                    // const next = request.next;
                     this.setState(
                         {
-                            previousProjectsUrl: previous,
-                            nextProjectsUrl: next,
-                            projectsList: projectsList,
+                            // previousProjectsUrl: previous,
+                            // nextProjectsUrl: next,
+                            // projectsList: projectsList,
+                            projectsList: request,
                         }
                     );
                 }
             })
             .catch(error => console.log(error));
-    };
+    }
+
+    deleteProject(id) {
+        const headers = this.getHeaders();
+        fetch(`${apiUrl}/api/projects/${id}/`,
+            {
+                method: 'DELETE',
+                'headers': headers,
+            })
+            .then(() => {
+                this.setState({projectsList: this.state.projectsList.filter(project => project.id !== id)});
+            })
+            .catch(error => console.log(error));
+    }
+
+    deactivateToDo(id) {
+        const headers = this.getHeaders();
+        fetch(`${apiUrl}/api/todo/${id}/`,
+            {
+                method: 'DELETE',
+                'headers': headers
+            })
+            .then(() => {
+                let toDoList = this.state.toDoList;
+                toDoList = toDoList.map(toDo => {
+                    if(toDo.id === +id) {
+                        toDo.isActive = false;
+                    }
+                    return toDo;
+                })
+                this.setState({'toDoList': toDoList});
+            })
+            .catch(error => console.log(error));
+    }
 
     componentDidMount() {
         this.getStorageToken();
@@ -211,6 +248,13 @@ class App extends React.Component {
                                        nextPage={this.state.nextToDosUrl}
                                        previousPage={this.state.previousToDosUrl}
                                        load={this.loadToDo.bind(this)}
+                                       deactivate={this.deactivateToDo.bind(this)}
+                            />
+                        </Route>
+                        <Route exact path='/todos/create'>
+                            <ToDoForm allProjects={this.state.projectsList}
+                                      allUsers={this.state.usersList}
+                                      username={this.state.username}
                             />
                         </Route>
                         <Route exact path={'/projects'}>
@@ -218,7 +262,11 @@ class App extends React.Component {
                                           nextPage={this.state.nextProjectsUrl}
                                           previousPage={this.state.previousProjectsUrl}
                                           load={this.loadProjects.bind(this)}
+                                          deleteProject={this.deleteProject.bind(this)}
                             />
+                        </Route>
+                        <Route exact path='/projects/create'>
+                            <ProjectForm allUsers={this.state.usersList}/>
                         </Route>
                         <Route exact path={'/projects/:id'}>
                             <ProjectDetail projectsList={this.state.projectsList}/>

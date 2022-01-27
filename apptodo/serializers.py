@@ -23,4 +23,4 @@ class ToDoSerializer(ModelSerializer):
 
 class ToDoGetSerializer(ToDoSerializer):
     creator = CustomUserSerializer()
-    project = ProjectSerializer()
+    project = ProjectGetSerializer()
