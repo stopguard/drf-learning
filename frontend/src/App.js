@@ -33,6 +33,7 @@ class App extends React.Component {
             previousProjectsUrl: null,
             nextProjectsUrl: null,
             projectsList: [],
+            filteredProjectsList: [],
             previousToDosUrl: null,
             nextToDosUrl: null,
             toDoList: [],
@@ -45,10 +46,10 @@ class App extends React.Component {
         cookies.set('username', username);
         if (token !== '') {
             this.setState({token: token, isAuthenticated: true});
-            this.getStorageToken();
         } else {
             this.setState({token: token, isAuthenticated: false});
         }
+        this.getStorageToken();
     }
 
     logout() {
@@ -125,6 +126,8 @@ class App extends React.Component {
                             usersList: request,
                         }
                     );
+                } else {
+                    this.logout()
                 }
             })
             .catch(error => console.log(error));
@@ -152,7 +155,47 @@ class App extends React.Component {
                             toDoList: toDos,
                         }
                     );
+                } else {
+                    this.logout()
                 }
+            })
+            .catch(error => console.log(error));
+    }
+
+    createUpdateToDo(id, creator, project, body) {
+        const headers = this.getHeaders();
+        let method = 'POST';
+        let toDo = '';
+        if (id) {
+            method = 'PUT';
+            toDo = `${id}/`
+        }
+        fetch(`${apiUrl}/todo/${toDo}`,
+            {
+                method: method,
+                headers: headers,
+                body: JSON.stringify({creator: creator, project: project, body: body})
+            })
+            .then(() => this.getStorageToken())
+            .catch(error => console.log(error))
+    }
+
+    deactivateToDo(id) {
+        const headers = this.getHeaders();
+        fetch(`${apiUrl}/todo/${id}/`,
+            {
+                method: 'DELETE',
+                'headers': headers
+            })
+            .then(() => {
+                let toDoList = this.state.toDoList;
+                toDoList = toDoList.map(toDo => {
+                    if (toDo.id === +id) {
+                        toDo.isActive = false;
+                    }
+                    return toDo;
+                })
+                this.setState({'toDoList': toDoList});
             })
             .catch(error => console.log(error));
     }
@@ -176,44 +219,53 @@ class App extends React.Component {
                         {
                             // previousProjectsUrl: previous,
                             // nextProjectsUrl: next,
-                            // projectsList: projectsList,
+                            // projectsList: projectsList, // если пагинация то запрашиваем искомые проекты у апи
                             projectsList: request,
+                            filteredProjectsList: request,
                         }
                     );
+                } else {
+                    this.logout()
                 }
             })
             .catch(error => console.log(error));
     }
 
+    projectFilter(searchLine) {
+        let re = new RegExp(searchLine, 'i')
+        let filteredList = searchLine === '' ?
+            this.state.projectsList :
+            this.state.projectsList.filter(project => project.name.match(re))
+        this.setState({filteredProjectsList: filteredList})
+    }
+
+    createUpdateProject(id, name, gitLink, users) {
+        const headers = this.getHeaders();
+        let method = 'POST';
+        let project = '';
+        if (id) {
+            method = 'PUT';
+            project = `${id}/`
+        }
+        fetch(`${apiUrl}/projects/${project}`,
+            {
+                method: method,
+                headers: headers,
+                body: JSON.stringify({name: name, gitLink: gitLink, users: users})
+            })
+            .then(() => this.getStorageToken())
+            .catch(error => console.log(error))
+    }
+
     deleteProject(id) {
         const headers = this.getHeaders();
-        fetch(`${apiUrl}/api/projects/${id}/`,
+        fetch(`${apiUrl}/projects/${id}/`,
             {
                 method: 'DELETE',
                 'headers': headers,
             })
             .then(() => {
                 this.setState({projectsList: this.state.projectsList.filter(project => project.id !== id)});
-            })
-            .catch(error => console.log(error));
-    }
-
-    deactivateToDo(id) {
-        const headers = this.getHeaders();
-        fetch(`${apiUrl}/api/todo/${id}/`,
-            {
-                method: 'DELETE',
-                'headers': headers
-            })
-            .then(() => {
-                let toDoList = this.state.toDoList;
-                toDoList = toDoList.map(toDo => {
-                    if(toDo.id === +id) {
-                        toDo.isActive = false;
-                    }
-                    return toDo;
-                })
-                this.setState({'toDoList': toDoList});
             })
             .catch(error => console.log(error));
     }
@@ -251,22 +303,41 @@ class App extends React.Component {
                                        deactivate={this.deactivateToDo.bind(this)}
                             />
                         </Route>
+                        <Route exact path={'/projects/:id/edit'}>
+                            <ProjectForm allUsers={this.state.usersList}
+                                         allProjects={this.state.projectsList}
+                                         createUpdateProject={this.createUpdateProject.bind(this)}/>
+                        </Route>
                         <Route exact path='/todos/create'>
                             <ToDoForm allProjects={this.state.projectsList}
                                       allUsers={this.state.usersList}
                                       username={this.state.username}
-                            />
+                                      createUpdateToDo={this.createUpdateToDo.bind(this)}/>
+                        </Route>
+                        <Route exact path={'/todos/:id/edit'}>
+                            <ToDoForm allUsers={this.state.usersList}
+                                      allToDos={this.state.toDoList}
+                                      allProjects={this.state.projectsList}
+                                      username={this.state.username}
+                                      createUpdateToDo={this.createUpdateToDo.bind(this)}/>
                         </Route>
                         <Route exact path={'/projects'}>
-                            <ProjectsList projectsList={this.state.projectsList}
+                            <ProjectsList projectsList={this.state.filteredProjectsList}
                                           nextPage={this.state.nextProjectsUrl}
                                           previousPage={this.state.previousProjectsUrl}
                                           load={this.loadProjects.bind(this)}
                                           deleteProject={this.deleteProject.bind(this)}
+                                          projectFilter={this.projectFilter.bind(this)}
                             />
                         </Route>
                         <Route exact path='/projects/create'>
-                            <ProjectForm allUsers={this.state.usersList}/>
+                            <ProjectForm allUsers={this.state.usersList}
+                                         createUpdateProject={this.createUpdateProject.bind(this)}/>
+                        </Route>
+                        <Route exact path={'/projects/:id/edit'}>
+                            <ProjectForm allUsers={this.state.usersList}
+                                         allProjects={this.state.projectsList}
+                                         createUpdateProject={this.createUpdateProject.bind(this)}/>
                         </Route>
                         <Route exact path={'/projects/:id'}>
                             <ProjectDetail projectsList={this.state.projectsList}/>

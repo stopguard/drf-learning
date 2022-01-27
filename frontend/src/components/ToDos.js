@@ -9,7 +9,10 @@ const ToDoItem = ({toDo, deactivate}) => {
             <td>{toDo.project.name}</td>
             <td>{toDo.body}</td>
             <td>{`${toDo.isActive}`}</td>
-            <td>{toDo.isActive && <button onClick={() => deactivate(toDo.id)} type='button'>Deactivate</button>}</td>
+            {toDo.isActive &&
+                <td>
+                    <Link to={`/todos/${toDo.id}/edit`}>Change</Link> <button onClick={() => deactivate(toDo.id)} type='button'>Deactivate</button>
+                </td>}
         </tr>
     );
 };

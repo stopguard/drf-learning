@@ -1,11 +1,15 @@
 import React from "react";
+import {withRouter} from "react-router-dom";
 
 class ProjectForm extends React.Component {
     constructor(props) {
         super(props);
-        let project = props.project
-        if(project) {
+        let projectId = +props.match.params.id
+        if(projectId) {
+            let projects = props.allProjects.filter(project => project.id === projectId)
+            let project = projects.length > 0 ? projects[0] : {users: []}
             let users = project.users.map(user => user.id)
+            console.log(users)
             this.state = {
                 id: project.id,
                 name: project.name,
@@ -14,6 +18,7 @@ class ProjectForm extends React.Component {
             };
         } else {
             this.state = {
+                id: null,
                 name: '',
                 gitLink: '',
                 users: [],
@@ -44,9 +49,12 @@ class ProjectForm extends React.Component {
 
     handleSubmit(e) {
         e.preventDefault();
-        console.log(this.state.name);
-        console.log(this.state.gitLink);
-        console.log(this.state.users);
+        this.props.createUpdateProject(
+            this.state.id,
+            this.state.name,
+            this.state.gitLink,
+            this.state.users
+        )
     }
 
     render() {
@@ -80,7 +88,7 @@ class ProjectForm extends React.Component {
                         onChange={e => this.handleUsersChange(e)}
                     >
                         {this.props.allUsers.map(user => {
-                            if (this.state.users.length > 0 && user.id in this.state.users){
+                            if (this.state.users.length > 0 && this.state.users.includes(user.id)){
                                 return <option selected key={user.id} value={user.id}>
                                     {`${user.firstName} ${user.lastName}`}
                                 </option>
@@ -97,4 +105,4 @@ class ProjectForm extends React.Component {
     }
 }
 
-export default ProjectForm
+export default withRouter(ProjectForm)
