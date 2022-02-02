@@ -13,9 +13,11 @@ class ProjectSerializer(ModelSerializer):
 
 
 class ToDoSerializer(ModelSerializer):
-    creator = StringRelatedField()
-    project = StringRelatedField()
-
     class Meta:
         model = ToDo
         fields = '__all__'
+
+
+class ToDoGetSerializer(ToDoSerializer):
+    creator = StringRelatedField()
+    project = StringRelatedField()
