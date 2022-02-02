@@ -1,28 +1,25 @@
 import React from "react";
 
-const UserItem = ({user}) => {
+const ToDoItem = ({toDo}) => {
     return (
         <tr>
             <td>
-                {user.id}
+                {toDo.id}
             </td>
             <td>
-                {user.username}
+                {toDo.creator}
             </td>
             <td>
-                {user.firstName}
+                {toDo.project}
             </td>
             <td>
-                {user.lastName}
-            </td>
-            <td>
-                {user.email}
+                {toDo.body}
             </td>
         </tr>
     );
 };
 
-const UsersList = ({usersList, previousPage, nextPage, load}) => {
+const ToDosList = ({toDosList, previousPage, nextPage, load}) => {
     return (
         <div>
             <p>
@@ -36,25 +33,22 @@ const UsersList = ({usersList, previousPage, nextPage, load}) => {
                         ID
                     </th>
                     <th>
-                        Username
+                        Creator
                     </th>
                     <th>
-                        First name
+                        Project
                     </th>
                     <th>
-                        Last Name
-                    </th>
-                    <th>
-                        Email
+                        Text
                     </th>
                 </tr>
                 </thead>
                 <tbody>
-                {usersList.map((user) => <UserItem key={user.id} user={user}/>)}
+                {toDosList.map((toDo) => <ToDoItem key={toDo.id} toDo={toDo}/>)}
                 </tbody>
             </table>
         </div>
     );
 };
 
-export default UsersList;
+export default ToDosList;
