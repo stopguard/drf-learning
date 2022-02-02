@@ -9,6 +9,7 @@ class CustomUserModelViewSet(ListModelMixin, RetrieveModelMixin,
                              UpdateModelMixin, GenericViewSet):
     queryset = get_user_model().objects.all()
     serializer_class = CustomUserSerializer
+    pagination_class = None  # чтобы избежать возни с вьюхами. Как сделать знаю, но на отладку нет времени
 
     def get_serializer_class(self):
         print('API version', self.request.version)
