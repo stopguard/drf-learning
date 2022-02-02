@@ -48,10 +48,6 @@ class App extends React.Component {
         }
     }
 
-    // isAuthenticated() {
-    //     return this.state.token !== '';
-    // }
-
     logout() {
         this.setToken('');
     }
@@ -72,7 +68,7 @@ class App extends React.Component {
     }
 
     getToken(username, password) {
-        fetch(`${apiUrl}/api-jwt/`,
+        fetch(`${apiUrl}/api/jwt/`,
             {
                 method: "POST",
                 headers: {

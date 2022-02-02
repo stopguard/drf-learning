@@ -76,7 +76,7 @@ class TestProjectModelViewSet(TestCase):
     def live_test_get_detail(self):
         client = RequestsClient()
         print('\nlive get detail check')
-        token_response = requests.post(f'http://{API_IP}:8000/api-jwt/',
+        token_response = requests.post(f'http://{API_IP}:8000/api/jwt/',
                                        data={'username': 'django',
                                              'password': 'geekshop'})
 
