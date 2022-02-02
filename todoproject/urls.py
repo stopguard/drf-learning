@@ -2,8 +2,9 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 
+from appauth.jwtcustomizing import MyTokenObtainPairView
 from appauth.views import CustomUserModelViewSet
 from apptodo.views import ProjectModelViewSet, ToDoModelViewSet
 
