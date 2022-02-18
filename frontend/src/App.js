@@ -11,7 +11,7 @@ import LoginForm from "./components/Auth";
 import ToDoForm from "./components/ToDoForm";
 import ProjectForm from "./components/ProjectForm";
 
-const apiIpAddress = '192.168.0.103'
+const apiIpAddress = '127.0.0.1'
 const apiUrl = `http://${apiIpAddress}:8000/api`;
 
 const page404 = ({path}) => {
